@@ -24,23 +24,27 @@ namespace ariles2
         class ReaderNodeWrapper : public NodeBase
         {
         protected:
-            std::set<std::string> childs_;
+            const std::set<std::string> childs_;
             std::set<std::string>::const_iterator childs_iterator_;
             const rclcpp::Parameter parameter_;
 
         public:
             using NodeBase::NodeBase;
 
-            ReaderNodeWrapper(const std::string &name, std::set<std::string> childs)
-              : NodeBase(name, NodeBase::Type::ITERATED_MAP), childs_(std::move(childs))
+            ReaderNodeWrapper(const std::string &name, std::set<std::string> &&childs)
+              : NodeBase(name, NodeBase::Type::ITERATED_MAP), childs_(childs)
             {
                 size_ = childs_.size();
-                childs_iterator_ = childs_.begin();
+                childs_iterator_ = childs_.cbegin();
             }
 
             const std::string &getChildName()
             {
-                return (*childs_iterator_++);
+                if (index_ + 1 < size_)
+                {
+                    return (*childs_iterator_++);
+                }
+                return (*childs_iterator_);
             }
 
             explicit ReaderNodeWrapper(const rclcpp::Parameter &&parameter)
@@ -263,7 +267,7 @@ namespace ariles2
                 }
             };
         }  // namespace impl
-    }      // namespace ns_ros2param
+    }  // namespace ns_ros2param
 }  // namespace ariles2
 
 
